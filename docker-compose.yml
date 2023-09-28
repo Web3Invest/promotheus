@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+
+  prometheus:
+    hostname: prometheus.devbox
+    image: prom/prometheus:v2.11.1
+    deploy:
+      replicas: 1
+    volumes:
+      - prometheus:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=365d'
+    networks:
+      - web
+      - prometheus
+    ports:
+      - 9090:9090
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=gateway
+      - traefik.http.routers.prometheus.rule=Host(`promotheus.testnet.web3invest.fr`)
+      - traefik.http.routers.prometheus.entrypoints=web,websecure
+      - traefik.http.routers.prometheus.tls.certresolver=w3i_ssl
+      - traefik.http.services.prometheus.loadbalancer.server.port=80
+      - traefik.http.routers.prometheus.service=prometheus
+
+  node_exporter:
+    hostname: node_exporter.devbox
+    image: quay.io/prometheus/node-exporter:latest
+    command:
+      - --path.rootfs=/host
+      - --collector.systemd
+      - --collector.processes
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - prometheus
+
+volumes:
+  prometheus: {}
+
+networks:
+  prometheus:
+  web:
+    external:
+      name: traefik_webgateway

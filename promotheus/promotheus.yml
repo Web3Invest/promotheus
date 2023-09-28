@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 6s
+
+  external_labels:
+    env: 'devbox'
+
+# spécification du serveur alertmanager
+# alerting:
+#   alertmanagers:
+#   - static_configs:
+#     - targets:
+#       - localhost:9093
+#     scheme: http
+#     timeout: 10s
+
+# fichier de règles pour l'alerting, c'est dans ce fichier que sont les définitions des alertes
+# rule_files:
+#   - "/alertmanager/alert.rules/alerts.rules.yml"
+
+# la scrape configuration de prometheus, les hosts qu'il va contacter pour chercher les métrique
+scrape_configs:
+
+  - job_name: 'node'
+    scheme: http
+    static_configs:
+      - targets: 
+        - node_exporter:9100  # devbox
+        # - 192.168.1.10:9100   # presearch001
+        # - 192.168.1.22:9100    # flux001
+        # - 192.168.1.20:9100    # flux002
+
+
+  # - job_name: 'whoami'
+  #   scheme: http
+  #   metrics_path: /
+  #   static_configs:
+  #     - targets: 
+  #       - 'whoami.devbox'
